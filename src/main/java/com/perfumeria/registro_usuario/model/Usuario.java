@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 
-public class UsuarioModel {
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // para marcar que la id sea auto increment
@@ -25,6 +25,8 @@ public class UsuarioModel {
     private int id;
     @Column (length = 30, nullable = false)
     private String nombre;
+    @Column(length = 50, nullable =false)
+    private String apellido;
     @Column(length = 20, nullable = false)
     private String usuario;
     @Column(length = 40, nullable = false)
@@ -35,8 +37,6 @@ public class UsuarioModel {
     private String correo;
     @Column(length = 50, nullable =false)
     private String dereccion;    
-    @Column(length = 50, nullable =false)
-    private String apellido;
     @Column(nullable = false)
     private int perfil;
 
