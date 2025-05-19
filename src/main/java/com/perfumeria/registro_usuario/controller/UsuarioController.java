@@ -32,7 +32,8 @@ public class UsuarioController {
 
         
     }
-    @PostMapping ResponseEntity<Usuario> postUsuario(@RequestBody Usuario usuario){
+    @PostMapping("/registro") 
+    public ResponseEntity<Usuario> postUsuario(@RequestBody Usuario usuario){
         Usuario buscar = usuarioService.findById(usuario.getId());
         if (buscar == null) {
             return new ResponseEntity<>(usuarioService.createUsuario(usuario), HttpStatus.CREATED);
