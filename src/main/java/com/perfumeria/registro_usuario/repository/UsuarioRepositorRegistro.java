@@ -7,12 +7,12 @@ import org.springframework.stereotype.Repository;
 
 import com.perfumeria.registro_usuario.model.Usuario;
 @Repository
-public interface UsuarioRpository extends JpaRepository<Usuario, Integer> {
+public interface UsuarioRepositorRegistro extends JpaRepository<Usuario, Integer> {
     List<Usuario> findAll();
     @SuppressWarnings("unchecked")
     
     Usuario save(Usuario usuario);
-
+    
     Usuario findById(int id);
 
 
