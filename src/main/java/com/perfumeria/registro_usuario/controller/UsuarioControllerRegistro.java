@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.perfumeria.registro_usuario.model.Usuario;
 import com.perfumeria.registro_usuario.service.UsuarioServiceRegistro;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,8 +57,13 @@ public class UsuarioControllerRegistro {
 
         // Asegurar que el ID del usuario coincide con el de la URL
         if (usuario.getId() != id) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(null); // IDs no coinciden
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // IDs no coinciden
+        }
+        if (usuario.getPermiso() != 3) {
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Permiso no válido
+            
+            
         }
 
         // Intentar actualizar el usuario
@@ -65,12 +71,24 @@ public class UsuarioControllerRegistro {
 
         // Validar si la actualización fue exitosa
         if (usuarioActualizado == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null); // Fallo en la actualización
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Fallo en la actualización
         }
 
         // Respuesta exitosa
         return ResponseEntity.ok(usuarioActualizado);
     }
+@DeleteMapping("/delete/{id}")
+public ResponseEntity<String> deleteUserById(@PathVariable int id) {
+    Usuario userActual = usuarioService.findById(id);
+    if (userActual == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+    }
+    if (userActual.getPermiso() == 3) {
+        usuarioService.deleteUserById(id);
+        return ResponseEntity.ok("Usuario eliminado correctamente");
+    } else {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permiso denegado");
+    }
+}
 
 }

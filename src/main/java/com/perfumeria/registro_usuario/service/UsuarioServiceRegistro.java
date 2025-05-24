@@ -61,10 +61,7 @@ public class UsuarioServiceRegistro {
     }
         public Usuario deleteUserById(int id) {
         Usuario usuario = usuarioRepository.findById(id);
-        if (usuario != null) {
             usuarioRepository.delete(usuario);
             return usuario;
-        }
-        return null;
     }
 }

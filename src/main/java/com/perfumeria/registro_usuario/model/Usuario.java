@@ -40,6 +40,6 @@ public class Usuario {
     @Column(length = 50, nullable =false)
     private String direccion;    
     @Column(nullable = false)
-    private int permiso;
+    private int permiso; // 0 = cliente, 1 = vendedor, 2 = administrador
 
 }
