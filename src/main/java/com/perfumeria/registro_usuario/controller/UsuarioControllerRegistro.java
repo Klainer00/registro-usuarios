@@ -46,49 +46,60 @@ public class UsuarioControllerRegistro {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Usuario> putUsuario(@PathVariable int id, @RequestBody Usuario usuario) {
-        // Buscar el usuario existente por ID
+    public ResponseEntity<Usuario> updateUserById(@PathVariable int id, @RequestBody Usuario usuarioact) {
         Usuario buscar = usuarioService.findById(id);
-
-        // Verificar si el usuario existe
+        System.out.println(usuarioact);
         if (buscar == null) {
+            System.out.println("pase por buscar");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
-        // Asegurar que el ID del usuario coincide con el de la URL
-        if (usuario.getId() != id) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // IDs no coinciden
-        }
-        if (usuario.getPermiso() != 3) {
-
+        System.out.println("usuario a actualizar: " + id + ", name: " + usuarioact.getNombre());
+        System.out.println(" usuario a actualizar: " + id + " usuario recibido: " + usuarioact.getId());
+        if (buscar.getId() != usuarioact.getId()) {
+            System.out.println("pase por id no coinciden");
+            System.out.println("ID del usuario a actualizar: " + id + ", ID del usuario encontrado: " + buscar.getId());
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // IDs no coinciden
+         }
+        if (buscar.getPermiso() != 3) {
+            System.out.println("pase por permisos");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Permiso no válido
-            
-            
         }
-
-        // Intentar actualizar el usuario
-        Usuario usuarioActualizado = usuarioService.updateUsuario(usuario);
-
-        // Validar si la actualización fue exitosa
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaa");
+        Usuario usuarioActualizado = usuarioService.updateUsuario(usuarioact);
         if (usuarioActualizado == null) {
+            System.out.println("pase pa aca usuarioActualizado");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Fallo en la actualización
         }
-
-        // Respuesta exitosa
         return ResponseEntity.ok(usuarioActualizado);
     }
-@DeleteMapping("/delete/{id}")
-public ResponseEntity<String> deleteUserById(@PathVariable int id) {
-    Usuario userActual = usuarioService.findById(id);
-    if (userActual == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteUserById(@PathVariable int id) {
+        Usuario userActual = usuarioService.findById(id);
+        if (userActual == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+        if (userActual.getPermiso() == 3) {
+            usuarioService.deleteUserById(id);
+            return ResponseEntity.ok("Usuario eliminado correctamente");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permiso denegado");
+        }
     }
-    if (userActual.getPermiso() == 3) {
-        usuarioService.deleteUserById(id);
-        return ResponseEntity.ok("Usuario eliminado correctamente");
-    } else {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permiso denegado");
+@PutMapping("/nuevo-estado/{id}") 
+    public ResponseEntity<Usuario> descativarUserById( 
+            @PathVariable int id, 
+            @RequestBody Usuario usuarioConNuevoEstado) {
+        
+        Usuario usuarioActualizado = usuarioService.cambiarEstado(id, usuarioConNuevoEstado); 
+        
+        if (usuarioActualizado != null) {
+            System.out.println("Usuario actualizado con nuevo estado: " + usuarioActualizado.isEstado());
+            return ResponseEntity.ok(usuarioActualizado); 
+        } else {
+            System.out.println("Usuario no encontrado o error al cambiar el estado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); 
+        }
     }
-}
 
 }

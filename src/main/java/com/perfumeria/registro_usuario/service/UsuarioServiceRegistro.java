@@ -27,31 +27,35 @@ public class UsuarioServiceRegistro {
         return usuarioRepository.findById(id);
     }
     public Usuario updateUsuario(Usuario usuarioActualizado) {
-        Usuario buscar = findById(usuarioActualizado.getId());
+        Usuario buscar = this.findById(usuarioActualizado.getId());
+            System.out.println("Servicio updateUsuario - ID del request: " + usuarioActualizado.getId() + 
+                               ", ID del usuario encontrado (BD): " + buscar.getId());
         if (buscar != null) {
-            if (usuarioActualizado != null) {
+            if (usuarioActualizado.getNombre() != null) {
                 buscar.setNombre(usuarioActualizado.getNombre());
             }
-            if (usuarioActualizado != null) {
+            if (usuarioActualizado.getP_apellido() != null) {
                 buscar.setP_apellido(usuarioActualizado.getP_apellido());
             }
-            if (usuarioActualizado != null) {
+            if (usuarioActualizado.getS_apellido() != null) {
                 buscar.setS_apellido(usuarioActualizado.getS_apellido());
             }
-            if (usuarioActualizado != null) {
+            if (usuarioActualizado.getUsuario() != null) {
                 buscar.setUsuario(usuarioActualizado.getUsuario());
             }
-            if (usuarioActualizado != null) {
+            if (usuarioActualizado.getCorreo() != null) {
                 buscar.setCorreo(usuarioActualizado.getCorreo());
             }
-            if (usuarioActualizado != null) {
+            if (usuarioActualizado.getContrasenna() != null) {
                 buscar.setContrasenna(usuarioActualizado.getContrasenna());
             }
-            if (usuarioActualizado != null) {
+            if (usuarioActualizado.getDireccion() != null) {
                 buscar.setDireccion(usuarioActualizado.getDireccion());
             }
-            if (usuarioActualizado != null) {
+            if (usuarioActualizado.isEstado()) {
                 buscar.setPermiso(usuarioActualizado.getPermiso());
+                buscar.setPermiso(usuarioActualizado.getPermiso());
+                
             }
             usuarioRepository.save(buscar);
             return usuarioActualizado;
@@ -64,4 +68,16 @@ public class UsuarioServiceRegistro {
             usuarioRepository.delete(usuario);
             return usuario;
     }
-}
+public Usuario cambiarEstado(int id, Usuario nuevoEstadoObj){ 
+        Usuario buscarUsuario = this.findById(id); 
+        if (buscarUsuario != null) {
+            buscarUsuario.setEstado(nuevoEstadoObj.isEstado()); 
+            return usuarioRepository.save(buscarUsuario); 
+        }
+        return null;
+    }
+
+
+    }
+
+

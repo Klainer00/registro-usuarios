@@ -41,5 +41,7 @@ public class Usuario {
     private String direccion;    
     @Column(nullable = false)
     private int permiso; // 0 = cliente, 1 = vendedor, 2 = administrador
+    @Column(nullable = false)   
+    private boolean estado = true; // true = activo, false = inactivo
 
 }
