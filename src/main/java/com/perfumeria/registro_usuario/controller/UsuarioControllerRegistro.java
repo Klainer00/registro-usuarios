@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -72,6 +74,17 @@ public class UsuarioControllerRegistro {
         }
         return ResponseEntity.ok(usuarioActualizado);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Usuario> getUsuarioById(@PathVariable int id){
+        Usuario usuario = usuarioService.findById(id);
+        if (usuario != null) {
+            return ResponseEntity.ok(usuario);
+        }else{
+            return ResponseEntity.noContent().build();
+        }
+    }    
+    
+    
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable int id) {
