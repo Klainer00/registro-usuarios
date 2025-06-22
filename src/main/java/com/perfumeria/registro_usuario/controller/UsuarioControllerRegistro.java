@@ -8,8 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.perfumeria.registro_usuario.dto.UsuarioDTO;
 import com.perfumeria.registro_usuario.model.Usuario;
-import com.perfumeria.registro_usuario.service.UsuarioServiceRegistro;
+import com.perfumeria.registro_usuario.service.UsuarioService;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,9 +26,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class UsuarioControllerRegistro {
 
     @Autowired
-    private UsuarioServiceRegistro usuarioService;
+    private UsuarioService usuarioService;
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Usuario>> getAll() {
         List<Usuario> usuarios = usuarioService.findAll();
         if (!usuarios.isEmpty()) {
@@ -36,17 +37,33 @@ public class UsuarioControllerRegistro {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
-
-    @PostMapping("/create")
-    public ResponseEntity<Usuario> postUsuario(@RequestBody Usuario usuario) {
-        Usuario buscar = usuarioService.findById(usuario.getId());
-        if (buscar == null) {
-            return new ResponseEntity<>(usuarioService.createUsuario(usuario), HttpStatus.CREATED);
+    @GetMapping("/all-dto")
+    public ResponseEntity<List<UsuarioDTO>> getAllDto() {
+        List<UsuarioDTO> usuarios = usuarioService.findAllDto();
+        if (!usuarios.isEmpty()) {
+            return new ResponseEntity<>(usuarios, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
-
+@PostMapping("/create")
+public ResponseEntity<?> postUsuario(@RequestBody Usuario usuario) {
+    try {
+        Usuario buscar = usuarioService.findById(usuario.getId());
+        if (buscar == null) {
+            Usuario creado = usuarioService.createUsuario(usuario);
+            return new ResponseEntity<>(creado, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("El usuario ya existe.", HttpStatus.NOT_ACCEPTABLE);
+        }
+    } catch (IllegalArgumentException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    } catch (Exception e) {
+        e.printStackTrace(); // Esto imprime el error en la consola
+    return new ResponseEntity<>("Error interno al crear el usuario: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}
+/*
     @PutMapping("/update/{id}")
     public ResponseEntity<Usuario> updateUserById(@PathVariable int id, @RequestBody Usuario usuarioact) {
         Usuario buscar = usuarioService.findById(id);
@@ -74,6 +91,7 @@ public class UsuarioControllerRegistro {
         }
         return ResponseEntity.ok(usuarioActualizado);
     }
+         */
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> getUsuarioById(@PathVariable int id){
         Usuario usuario = usuarioService.findById(id);
@@ -85,7 +103,7 @@ public class UsuarioControllerRegistro {
     }    
     
     
-
+/*
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable int id) {
         Usuario userActual = usuarioService.findById(id);
@@ -99,6 +117,7 @@ public class UsuarioControllerRegistro {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permiso denegado");
         }
     }
+         */
 @PutMapping("/nuevo-estado/{id}") 
     public ResponseEntity<Usuario> descativarUserById( 
             @PathVariable int id, 

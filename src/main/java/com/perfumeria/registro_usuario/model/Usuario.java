@@ -18,12 +18,11 @@ import lombok.NoArgsConstructor;
 
 
 public class Usuario {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // para marcar que la id sea auto increment
     @Column(unique = true)//indica el atributo de abajo
     private int id;
-    @Column(length = 13 , nullable = false)
+    @Column(length = 13 , nullable = false ,unique = true) //rut
     private String rut;
     @Column (length = 30, nullable = false)
     private String nombre;
@@ -35,13 +34,14 @@ public class Usuario {
     private String usuario;
     @Column(length = 40, nullable = false)
     private String contrasenna;
-    @Column(length = 50, nullable =false)
+    @Column(length = 50, nullable =false, unique = true) 
     private String correo;
     @Column(length = 50, nullable =false)
     private String direccion;    
-    @Column(nullable = false)
-    private int permiso; // 0 = cliente, 1 = vendedor, 2 = administrador
+    @Column(nullable = true)
+    private EnumRol permiso = EnumRol.CLIENTE; // 1 = cliente, 2 = vendedor, 3 = gerente ,4 = administrador
     @Column(nullable = false)   
     private boolean estado = true; // true = activo, false = inactivo
-
+    @Column(length = 14, nullable = false)
+    private String numero;
 }
