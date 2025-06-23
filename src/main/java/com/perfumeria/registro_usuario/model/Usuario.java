@@ -39,7 +39,7 @@ public class Usuario {
     @Column(length = 50, nullable =false)
     private String direccion;    
     @Column(nullable = true)
-    private EnumRol permiso = EnumRol.CLIENTE; // 1 = cliente, 2 = vendedor, 3 = gerente ,4 = administrador
+    private EnumRol permiso; // 1 = cliente, 2 = vendedor, 3 = gerente ,4 = administrador
     @Column(nullable = false)   
     private boolean estado = true; // true = activo, false = inactivo
     @Column(length = 14, nullable = false)

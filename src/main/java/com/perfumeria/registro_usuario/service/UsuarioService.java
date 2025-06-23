@@ -14,6 +14,7 @@ public class UsuarioService {
 
     private UsuarioRepository usuarioRepository;
 
+
     UsuarioService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
     }
@@ -29,6 +30,9 @@ public class UsuarioService {
         dto.setPermiso(usuario.getPermiso());
         dto.setEstado(usuario.isEstado());
         return dto;
+    }
+    public Usuario findById(int id) {
+        return usuarioRepository.findById(id);
     }
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
@@ -61,10 +65,6 @@ public Usuario createUsuario(Usuario usuario) {
     return usuarioRepository.save(usuario);
 }
 
-    public Usuario findById(int id) {
-        Usuario usuarioActual = usuarioRepository.findById(id);
-        return usuarioRepository.findById(id);
-    }
 
 public Usuario updateUsuario(Usuario usuarioActualizado) {
     Usuario usuarioExistente = usuarioRepository.findById(usuarioActualizado.getId());
@@ -97,7 +97,7 @@ public Usuario updateUsuario(Usuario usuarioActualizado) {
         if (usuarioActualizado.getContrasenna() != null) usuarioExistente.setContrasenna(usuarioActualizado.getContrasenna());
         if (usuarioActualizado.getCorreo() != null) usuarioExistente.setCorreo(usuarioActualizado.getCorreo());
         if (usuarioActualizado.getDireccion() != null) usuarioExistente.setDireccion(usuarioActualizado.getDireccion());
-        if (usuarioActualizado.getPermiso() != null) usuarioExistente.setPermiso(usuarioActualizado.getPermiso());
+        if (usuarioActualizado.getPermiso() != null) usuarioExistente.setPermiso(usuarioActualizado.getPermiso());        
         return usuarioRepository.save(usuarioExistente);
     }
 
@@ -114,19 +114,19 @@ public Usuario deleteUserById(int id) {
     var permiso = usuario.getPermiso();
     if (permiso != permiso.ADMINISTRADOR && permiso != permiso.GERENTE) {
         System.out.println("No tiene permiso para eliminar.");
-        throw new IllegalArgumentException("No tiene permiso para eliminar este usuario.");
+        throw new IllegalArgumentException("No tiene permiso para eliminar.");
     }
     usuarioRepository.delete(usuario);
     return usuario;
 }
 
     public Usuario cambiarEstado(int id, Usuario nuevoEstado) {
-        Usuario buscarUsuario = this.findById(id);
+        Usuario buscarUsuario = usuarioRepository.findById(id);
         if (buscarUsuario != null) {
             buscarUsuario.setEstado(nuevoEstado.isEstado());
             return usuarioRepository.save(buscarUsuario);
         }
         return null;
     }
-
+    
 }
