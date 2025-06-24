@@ -113,7 +113,7 @@ public Usuario updateUsuario(Usuario usuarioActualizado) {
     throw new IllegalArgumentException("No tiene permiso para actualizar");
 }
 
-public Usuario deleteUserById(int id) {
+public void deleteUsuarioById(int id) {
     Usuario usuario = usuarioRepository.findById(id);
     if (usuario == null) {
         System.out.println("Usuario no encontrado");
@@ -125,7 +125,7 @@ public Usuario deleteUserById(int id) {
         throw new IllegalArgumentException("No tiene permiso para eliminar.");
     }
     usuarioRepository.delete(usuario);
-    return usuario;
+
 }
 
     public Usuario cambiarEstado(int id, Usuario nuevoEstado) {

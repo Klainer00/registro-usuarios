@@ -111,7 +111,7 @@ public class UsuarioController {
         }
         if (userActual.getPermiso() == userActual.getPermiso().ADMINISTRADOR
                 || userActual.getPermiso() == userActual.getPermiso().GERENTE) {
-            usuarioService.deleteUserById(id);
+            usuarioService.deleteUsuarioById(id);
             return ResponseEntity.ok("Usuario eliminado correctamente");
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permiso denegado");
