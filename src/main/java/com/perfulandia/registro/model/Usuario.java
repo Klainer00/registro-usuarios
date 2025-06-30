@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // para marcar que la id sea auto increment
-    @Column(unique = true)//indica el atributo de abajo
     private int id;
     @Column(length = 13 , nullable = false ,unique = true) //rut
     private String rut;

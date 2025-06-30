@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
+import jakarta.persistence.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,6 @@ public class UsuarioServiceTest {
     @Test
     void testCreateUsuario() {
         Usuario usuario = new Usuario();
-        usuario.setId(1);
         usuario.setRut("12345678-9");
         usuario.setNombre("Juan");
         usuario.setP_apellido("Pérez");
@@ -44,10 +44,23 @@ public class UsuarioServiceTest {
         usuario.setPermiso(EnumRol.CLIENTE);
         usuario.setEstado(true);
         usuario.setNumero("1234567890");
-        when(usuarioRepository.save(usuario)).thenReturn(usuario);
+        Usuario usuario2 = new Usuario();
+        usuario2.setId(1); 
+        usuario2.setRut("12345678-9");
+        usuario2.setNombre("Juan");
+        usuario2.setP_apellido("Pérez");
+        usuario2.setS_apellido("Gómez");
+        usuario2.setUsuario("juanperez");
+        usuario2.setCorreo("juanPerez@gmail.com");
+        usuario2.setDireccion("Calle Falsa 123");
+        usuario2.setPermiso(EnumRol.CLIENTE);
+        usuario2.setEstado(true);
+        usuario2.setNumero("1234567890");
+        when(usuarioRepository.save(usuario)).thenReturn(usuario2);
         Usuario usuarioGuardado = usuarioService.createUsuario(usuario);
-        assertNotNull(usuarioGuardado);
-        assertEquals(usuario, usuarioGuardado);
+        System.out.println(usuarioGuardado);
+
+        assertThat(usuarioGuardado.getId()).isEqualTo(1);
         verify(usuarioRepository).save(usuario);
     }
 
@@ -99,6 +112,9 @@ public class UsuarioServiceTest {
         usuario.setNumero("1234567890");
         when(usuarioRepository.findById(1)).thenReturn(usuario);
 
+        //falta asserts
+        assertEquals(1, usuarioService.findById(1).getId());
+
     }
 
     @Test
@@ -128,7 +144,7 @@ public class UsuarioServiceTest {
         usuarioActualizado.setPermiso(EnumRol.CLIENTE);
         usuarioActualizado.setEstado(true);
         when(usuarioRepository.findById(1)).thenReturn(usuarioExistente);
-        ;
+        
         when(usuarioRepository.save(usuarioActualizado)).thenReturn(usuarioActualizado);
 
         Usuario resultado = usuarioService.updateUsuario(usuarioActualizado);
@@ -138,6 +154,7 @@ public class UsuarioServiceTest {
         System.out.println("Usuario actualizado: " + resultado);
         verify(usuarioRepository).findById(1);
         verify(usuarioRepository).save(usuarioActualizado);
+        System.out.println(usuarioActualizado);
     }
 
     @Test
@@ -154,25 +171,20 @@ public class UsuarioServiceTest {
         usuario.setPermiso(EnumRol.ADMINISTRADOR);
         usuario.setEstado(true);
         usuario.setNumero("1234567890");
+        System.out.println(usuario);
         when(usuarioRepository.findById(1)).thenReturn(usuario);
         usuarioService.deleteUsuarioById(1);
         verify(usuarioRepository).findById(1);
         verify(usuarioRepository).delete(usuario);
+        System.out.println(usuario.getId());
+        
+        
     }
     @Test
     void testCambiaEstadoUsuario() {
         Usuario usuario = new Usuario();
-        usuario.setId(1);
-        usuario.setRut("12345678-9");
-        usuario.setNombre("Juan");
-        usuario.setP_apellido("Pérez");
-        usuario.setS_apellido("Gómez");
-        usuario.setUsuario("juanperez");
-        usuario.setCorreo("juanPerez@gmail.com");
-        usuario.setDireccion("Calle Falsa 123");
-        usuario.setPermiso(EnumRol.ADMINISTRADOR);
         usuario.setEstado(true);
-        usuario.setNumero("1234567890");
+        System.out.println(usuario.isEstado());
         when(usuarioRepository.findById(1)).thenReturn(usuario);
 
         Usuario usuarioConNuevoEstado = new Usuario();
@@ -181,6 +193,7 @@ public class UsuarioServiceTest {
         assertEquals(false, usuario.isEstado());
         verify(usuarioRepository).findById(1);
         verify(usuarioRepository).save(usuario);
+        System.out.println(usuario.isEstado());
     }
 
 

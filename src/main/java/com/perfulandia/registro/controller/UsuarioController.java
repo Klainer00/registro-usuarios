@@ -3,6 +3,8 @@ package com.perfulandia.registro.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +15,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import java.util.stream.Collectors;
+import com.perfulandia.registro.assemblers.UsuarioAssembler;
 import com.perfulandia.registro.dto.UsuarioDTO;
 import com.perfulandia.registro.model.Usuario;
 import com.perfulandia.registro.service.UsuarioService;
@@ -24,14 +27,20 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+    @Autowired
+    private UsuarioAssembler assembler;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Usuario>> getAll() {
+    public ResponseEntity<CollectionModel<EntityModel<Usuario>>> getAll() {
         List<Usuario> usuarios = usuarioService.findAll();
         if (!usuarios.isEmpty()) {
-            return new ResponseEntity<>(usuarios, HttpStatus.OK);
+            List<EntityModel<Usuario>> usuarioModels = usuarios.stream()
+                    .map(assembler::toModel)
+                    .collect(Collectors.toList());
+            CollectionModel<EntityModel<Usuario>> collectionModel = CollectionModel.of(usuarioModels);
+            return ResponseEntity.ok(collectionModel);
         } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -51,7 +60,7 @@ public class UsuarioController {
             Usuario buscar = usuarioService.findById(usuario.getId());
             if (buscar == null) {
                 Usuario creado = usuarioService.createUsuario(usuario);
-                return new ResponseEntity<>(creado, HttpStatus.CREATED);
+                return new ResponseEntity<>(assembler.toModel(creado), HttpStatus.CREATED);
             } else {
                 return new ResponseEntity<>("El usuario ya existe.", HttpStatus.NOT_ACCEPTABLE);
             }
@@ -84,7 +93,7 @@ public class UsuarioController {
 
         try {
             Usuario usuarioActualizado = usuarioService.updateUsuario(usuarioact);
-            return ResponseEntity.ok(usuarioActualizado);
+            return ResponseEntity.ok(assembler.toModel(usuarioActualizado));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -94,10 +103,10 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> getUsuarioById(@PathVariable int id) {
+    public ResponseEntity<EntityModel<Usuario>> getUsuarioById(@PathVariable int id) {
         Usuario usuario = usuarioService.findById(id);
         if (usuario != null) {
-            return ResponseEntity.ok(usuario);
+            return ResponseEntity.ok(assembler.toModel(usuario));
         } else {
             return ResponseEntity.noContent().build();
         }
@@ -119,17 +128,15 @@ public class UsuarioController {
     }
 
     @PutMapping("/nuevo-estado/{id}")
-    public ResponseEntity<Usuario> descativarUserById(
+    public ResponseEntity<EntityModel<Usuario>> descativarUserById(
             @PathVariable int id,
             @RequestBody Usuario usuarioConNuevoEstado) {
 
         Usuario usuarioActualizado = usuarioService.cambiarEstado(id, usuarioConNuevoEstado);
 
         if (usuarioActualizado != null) {
-            System.out.println("Usuario actualizado con nuevo estado: " + usuarioActualizado.isEstado());
-            return ResponseEntity.ok(usuarioActualizado);
+            return ResponseEntity.ok(assembler.toModel(usuarioActualizado));
         } else {
-            System.out.println("Usuario no encontrado o error al cambiar el estado");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
