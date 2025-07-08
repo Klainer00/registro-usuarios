@@ -15,14 +15,20 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.stream.Collectors;
 import com.perfulandia.registro.assemblers.UsuarioAssembler;
 import com.perfulandia.registro.dto.UsuarioDTO;
 import com.perfulandia.registro.model.Usuario;
 import com.perfulandia.registro.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@Tag(name = "Usuarios", description = "API para la gestión de usuarios")
 public class UsuarioController {
 
     @Autowired
@@ -31,12 +37,17 @@ public class UsuarioController {
     private UsuarioAssembler assembler;
 
     @GetMapping("/all")
+    @Operation(summary = "Obtener todos los usuarios", description = "Devuelve una lista de todos los usuarios registrados.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de usuarios obtenida correctamente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+            @ApiResponse(responseCode = "204", description = "No hay usuarios disponibles", content = @Content)
+    })
     public ResponseEntity<CollectionModel<EntityModel<Usuario>>> getAll() {
         List<Usuario> usuarios = usuarioService.findAll();
         if (!usuarios.isEmpty()) {
             List<EntityModel<Usuario>> usuarioModels = usuarios.stream()
                     .map(assembler::toModel)
-                    .collect(Collectors.toList());
+                    .toList();
             CollectionModel<EntityModel<Usuario>> collectionModel = CollectionModel.of(usuarioModels);
             return ResponseEntity.ok(collectionModel);
         } else {
@@ -45,34 +56,54 @@ public class UsuarioController {
     }
 
     @GetMapping("/all-dto")
+    @Operation(summary = "Obtener todos los usuarios en formato DTO", description = "Devuelve una lista de usuarios en formato DTO.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de usuarios DTO obtenida correctamente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioDTO.class))),
+            @ApiResponse(responseCode = "204", description = "No hay usuarios disponibles", content = @Content)
+    })
     public ResponseEntity<List<UsuarioDTO>> getAllDto() {
         List<UsuarioDTO> usuarios = usuarioService.findAllDto();
         if (!usuarios.isEmpty()) {
-            return new ResponseEntity<>(usuarios, HttpStatus.OK);
+            return ResponseEntity.ok(usuarios);
         } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return ResponseEntity.noContent().build();
         }
     }
 
     @PostMapping("/create")
+    @Operation(summary = "Crear un nuevo usuario", description = "Crea un usuario nuevo con los datos proporcionados.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+            @ApiResponse(responseCode = "406", description = "El usuario ya existe", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
     public ResponseEntity<?> postUsuario(@RequestBody Usuario usuario) {
         try {
             Usuario buscar = usuarioService.findById(usuario.getId());
             if (buscar == null) {
                 Usuario creado = usuarioService.createUsuario(usuario);
-                return new ResponseEntity<>(assembler.toModel(creado), HttpStatus.CREATED);
+                return ResponseEntity.status(HttpStatus.CREATED).body(assembler.toModel(creado));
             } else {
-                return new ResponseEntity<>("El usuario ya existe.", HttpStatus.NOT_ACCEPTABLE);
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("El usuario ya existe.");
             }
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return new ResponseEntity<>("Error interno al crear el usuario: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno al crear el usuario: " + e.getMessage());
         }
     }
 
     @PutMapping("/update/{id}")
+    @Operation(summary = "Actualizar un usuario por ID", description = "Actualiza los datos de un usuario existente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Permiso denegado", content = @Content),
+            @ApiResponse(responseCode = "400", description = "IDs no coinciden o datos inválidos", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
     public ResponseEntity<?> updateUserById(@PathVariable int id, @RequestBody Usuario usuarioact) {
         Usuario usuarioBD = usuarioService.findById(id);
 
@@ -83,8 +114,7 @@ public class UsuarioController {
         if (usuarioBD.getPermiso() != usuarioBD.getPermiso().ADMINISTRADOR &&
                 usuarioBD.getPermiso() != usuarioBD.getPermiso().GERENTE &&
                 usuarioBD.getPermiso() != usuarioBD.getPermiso().CLIENTE) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Permiso denegado.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permiso denegado.");
         }
 
         if (usuarioBD.getId() != usuarioact.getId()) {
@@ -103,6 +133,11 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Obtener un usuario por ID", description = "Devuelve un usuario específico con enlaces HATEOAS.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+            @ApiResponse(responseCode = "204", description = "Usuario no encontrado", content = @Content)
+    })
     public ResponseEntity<EntityModel<Usuario>> getUsuarioById(@PathVariable int id) {
         Usuario usuario = usuarioService.findById(id);
         if (usuario != null) {
@@ -113,6 +148,12 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Eliminar un usuario por ID", description = "Elimina un usuario si tiene permisos adecuados.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario eliminado exitosamente", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Permiso denegado", content = @Content)
+    })
     public ResponseEntity<String> deleteUserById(@PathVariable int id) {
         Usuario userActual = usuarioService.findById(id);
         if (userActual == null) {
@@ -128,17 +169,18 @@ public class UsuarioController {
     }
 
     @PutMapping("/nuevo-estado/{id}")
-    public ResponseEntity<EntityModel<Usuario>> descativarUserById(
-            @PathVariable int id,
+    @Operation(summary = "Cambiar estado de un usuario", description = "Actualiza el estado (activo/inactivo) de un usuario.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Estado del usuario actualizado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content)
+    })
+    public ResponseEntity<EntityModel<Usuario>> descativarUserById(@PathVariable int id,
             @RequestBody Usuario usuarioConNuevoEstado) {
-
         Usuario usuarioActualizado = usuarioService.cambiarEstado(id, usuarioConNuevoEstado);
-
         if (usuarioActualizado != null) {
             return ResponseEntity.ok(assembler.toModel(usuarioActualizado));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-
 }

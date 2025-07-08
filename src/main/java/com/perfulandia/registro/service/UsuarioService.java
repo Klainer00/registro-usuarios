@@ -3,6 +3,7 @@ package com.perfulandia.registro.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.perfulandia.registro.dto.UsuarioDTO;
@@ -11,7 +12,7 @@ import com.perfulandia.registro.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
-
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
 
@@ -136,5 +137,6 @@ public void deleteUsuarioById(int id) {
         }
         return null;
     }
-    
+
+
 }
